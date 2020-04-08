@@ -39,6 +39,9 @@ class Simulator:
     def __del__(self):
         p.disconnect()
 
+    def __del__(self):
+        p.disconnect()
+
     def __init_vars(self, use_real_time):
         self._estop = False # Global e-stop
         self._trajectory_queue = {} # Dict mapping robot ids to (joint_positions, joint_velocities) tuple
