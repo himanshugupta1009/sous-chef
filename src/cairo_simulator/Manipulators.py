@@ -302,8 +302,8 @@ class Sawyer(Manipulator):
         @param target_velocities: Vector of 9 floats, indicating the speed that each joint should move to reach its position.
         '''
 
-        if len(target_position) and len(target_velocities) == 9:
-            p.setJointMotorControlArray(self._simulator_id, self._arm_dof_indices + self._gripper_dof_indices, p.POSITION_CONTROL, targetPositions=target_position, targetVelocities=target_velocities)
+        if len(target_position) and len(target_velocity) == 9:
+            p.setJointMotorControlArray(self._simulator_id, self._arm_dof_indices + self._gripper_dof_indices, p.POSITION_CONTROL, targetPositions=target_position, targetVelocities=target_velocity)
         else:
             rospy.logwarn("Invalid joint configuration/velocities provided for Sawyer %s. Needs to be 9 floats each (7 arm+ 2 gripper)" % self._name)
             return 
