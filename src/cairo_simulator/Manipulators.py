@@ -3,6 +3,7 @@ import json
 import numpy as np
 import rospy
 import pybullet as p
+import copy
 from std_msgs.msg import Float32MultiArray, Float32
 from std_msgs.msg import String, Empty
 from geometry_msgs.msg import Pose

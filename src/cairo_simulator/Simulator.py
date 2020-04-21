@@ -5,6 +5,7 @@ import sys
 from abc import ABC, abstractmethod
 import numpy as np
 import rospy
+import copy
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import String, Empty
 from geometry_msgs.msg import PoseStamped
@@ -14,13 +15,15 @@ import pybullet_data
 
 ASSETS_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../../assets/' # Find ./cairo_simulator/assets/ from ./cairo_simulator/src/cairo_simulator/
 
+# from cairo_simulator.Manipulators import Manipulator
 class Simulator:
-    __instance = None    
+    __instance = None
 
     @staticmethod
     def get_instance():
         if Simulator.__instance is None:
-            from cairo_simulator.Manipulators import Manipulator
+            # from cairo_simulator.Manipulators import Manipulator
+            # print("Manipulator")
             Simulator()
         return Simulator.__instance
 
@@ -33,6 +36,7 @@ class Simulator:
         self.__init_bullet()
         self.__init_vars(use_real_time)
         self.__init_ros()
+        self.__init_manipulator()
 
     def __del__(self):
         p.disconnect()
@@ -50,6 +54,7 @@ class Simulator:
         self.__sim_time = 0 # Used if not using real-time simulation. Increments at time_step
         self._sim_timestep = 1./240. # If not using real-time mode, amount of time to pass per step() call
         self.set_real_time(use_real_time)
+        self.__Manipulator = None
 
     def __init_bullet(self):
         # Simulation world setup
@@ -61,6 +66,10 @@ class Simulator:
     def __init_ros(self):
         rospy.Subscriber("/sim/estop_set", Empty, self.estop_set_callback)
         rospy.Subscriber("/sim/estop_release", Empty, self.estop_release_callback)
+
+    def __init_manipulator(self):
+        from cairo_simulator.Manipulators import Manipulator
+        self.__Manipulator = Manipulator
 
     def set_real_time(self, val):
         if val is False:
@@ -126,7 +135,7 @@ class Simulator:
                 # Send command to the robot controller
                 self._robots[id]._executing_trajectory = True
 
-                if isinstance(self._robots[id], Manipulator):
+                if isinstance(self._robots[id], self.__Manipulator):
                     self._robots[id].move_to_joint_pos_with_vel(next_pos, next_vel)
                 else:
                     rospy.logerr("No mechanism for handling trajectory execution for Robot Type %s" % (str(type(self._robots[id]))))

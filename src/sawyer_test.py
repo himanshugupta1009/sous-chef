@@ -1,7 +1,9 @@
 import pybullet as p
 import time
 import rospy
-from cairo_simulator.Simulator import Simulator, SimObject, ASSETS_PATH
+from cairo_simulator.Simulator import Simulator
+from cairo_simulator.Simulator import SimObject
+from cairo_simulator.Simulator import ASSETS_PATH
 from cairo_simulator.Manipulators import Sawyer
 
 def main():
@@ -20,7 +22,9 @@ def main():
     sim_obj = SimObject('cube3', 'cube_small.urdf', (0.69, 0.1, .55))
 
     joint_config = sawyer_robot.solve_inverse_kinematics([0.9,0,1.5], [0,0,0,1])
-    #sawyer_robot.move_to_joint_pos(joint_config)
+    print(joint_config)
+    random_var = sawyer_robot.execute_trajectory([(1., [0,0,0,0,0,0,0]), (2.5, [1,0,0,0,0,0,0]), (4, [1,0,2.9,1.23,1.52,0,0])])
+    sawyer_robot.move_to_joint_pos(joint_config)
 
     # Loop until someone shuts us down
     while rospy.is_shutdown() is not True:
