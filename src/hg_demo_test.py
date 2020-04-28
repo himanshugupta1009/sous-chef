@@ -13,8 +13,8 @@ def main():
 	use_real_time = True
 
 	sim = Simulator() # Initialize the Simulator
-
-	# Add a table and a Sawyer robot
+	#p.setGravity(0, 0, 0)
+    # Add a table and a Sawyer robot
 	table = SimObject("Table", ASSETS_PATH + 'table.sdf', (0.6, 0, 0), (0, 0, 1.5708))
 	sawyer_robot = Sawyer("sawyer0", 0, 0, 0.8)
 	robot_start_pos = p.getLinkState(sawyer_robot._simulator_id,sawyer_robot._end_effector_link_index)[0]
