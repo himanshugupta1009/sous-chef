@@ -27,6 +27,9 @@ def main():
 	c2 = p.loadURDF('cube_small.urdf', basePosition=c2_start_pos)
 	ball = p.loadURDF('sphere2red_nocol.urdf', basePosition=ball_start_pos, globalScaling=0.25)
 
+	joint_config = sawyer_robot.solve_inverse_kinematics([1.0,0.9,1.5])
+	sawyer_robot.move_to_joint_pos(joint_config)
+
 	x_ball_positions = np.linspace(ball_start_pos[0],c2_start_pos[0],10)
 	y_ball_positions  = np.linspace(ball_start_pos[1],c2_start_pos[1],10)
 	z_ball_positions = np.linspace(ball_start_pos[2],c2_start_pos[2],10)
@@ -41,7 +44,6 @@ def main():
 		sawyer_robot.move_to_joint_pos(joint_config)
 		print(i)
 		time.sleep(1)
-
 
 if __name__ == "__main__":
     main()
