@@ -22,8 +22,6 @@ class Simulator:
     @staticmethod
     def get_instance():
         if Simulator.__instance is None:
-            # from cairo_simulator.Manipulators import Manipulator
-            # print("Manipulator")
             Simulator()
         return Simulator.__instance
 
@@ -117,7 +115,7 @@ class Simulator:
         cur_time = time.time()
 
         for id in self._trajectory_queue.keys():
-            if self._trajectory_queue[id] is None: continue # Nothing on queue
+            if self._trajectory_queue[id] is None or len(self._trajectory_queue[id][0]) is 0: continue # Nothing on queue
 
             # Check if robot is at the first pos vector off the robot's pos/vel tuple
             pos_vector, vel_vector = self._trajectory_queue[id]
@@ -148,6 +146,18 @@ class Simulator:
                 rospy.logwarn("Trajectory for robot %d timed out! Aborting remainder of trajectory." % id)
                 self.clear_trajectory_queue(id)
                 continue
+
+            else:
+                next_pos = pos_vector[0]
+                next_vel = vel_vector[0]
+                self._trajectory_queue[id][0].pop(0)
+                self._trajectory_queue[id][1].pop(0)
+                print("popped")
+                if isinstance(self._robots[id], self.__Manipulator):
+                    self._robots[id].move_to_joint_pos_with_vel(next_pos, next_vel)
+                else:
+                    rospy.logerr("No mechanism for handling trajectory execution for Robot Type %s" % (str(type(self._robots[id]))))
+                    continue
 
     def add_object(self, simobj_obj):
         id = simobj_obj.get_simulator_id()
