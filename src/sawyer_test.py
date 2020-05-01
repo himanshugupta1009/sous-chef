@@ -66,11 +66,14 @@ def main():
     start[1] = math.floor((start[1]+1)*100)
     start[2] = math.floor(start[2]*100)
     end = [80, 150, 55]
+    time.sleep(3)
     # sawyer_path = astar_path(obstacle,start,end)
-    joint_config = sawyer_robot.solve_inverse_kinematics([0.8,-0.5,1.0], [0,0,0,1])
-    sawyer_robot.move_to_joint_pos(joint_config)
-    joint_config = sawyer_robot.solve_inverse_kinematics([0.8,-0.5,0.55], [1,0,0,0])
-    sawyer_robot.move_to_joint_pos(joint_config)
+    joint_config_1 = sawyer_robot.solve_inverse_kinematics([0.8,-0.5,1.5], [0,0,0,1])
+    # sawyer_robot.move_to_joint_pos(joint_config_1)
+    joint_config_2 = sawyer_robot.solve_inverse_kinematics([0.8,-0.5,0.65], [1,0,0,0])
+    # sawyer_robot.move_to_joint_pos(joint_config_2)
+    traj = ((2., joint_config_1), (4., joint_config_2))
+    sawyer_robot.execute_trajectory(traj)
     # Loop until someone shuts us down
     while rospy.is_shutdown() is not True:
         sim.step()
