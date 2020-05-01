@@ -109,6 +109,7 @@ def search(maze, cost, start, end):
         
         # Every time any node is referred from yet_to_visit list, counter of limit operation incremented
         outer_iterations += 1    
+        print(outer_iterations)
 
         
         # Get the current node
@@ -137,7 +138,6 @@ def search(maze, cost, start, end):
         children = []
 
         for new_position in move: 
-
             # Get node position
             node_position = (current_node.position[0] + new_position[0], current_node.position[1] + new_position[1], current_node.position[2] + new_position[2])
 
@@ -184,13 +184,9 @@ def search(maze, cost, start, end):
             yet_to_visit_list.append(child)
 
 
-if __name__ == '__main__':
-
-    maze = np.random.randint(2, size=(5,5,5))
-    print(maze)
-    start = [0,0,0] # starting position
-    end = [4,3,2] # ending position
-    cost = 1 # cost per movement
-
+def astar_path(maze=np.random.randint(2, size=(5,5,5)),start=[0,0,0],end=[4,3,2],cost=1):
     path = search(list(maze),cost, start, end)
-    print(np.asarray(path))
+    return path
+
+if __name__ == "__main__":
+    astar_path()
