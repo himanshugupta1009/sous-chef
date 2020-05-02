@@ -6,7 +6,6 @@ import copy
 from abc import ABC, abstractmethod
 import numpy as np
 import rospy
-import copy
 from std_msgs.msg import Float32MultiArray
 from std_msgs.msg import String, Empty
 from geometry_msgs.msg import PoseStamped
@@ -15,9 +14,10 @@ import pybullet_data
 
 ASSETS_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../../assets/' # Find ./cairo_simulator/assets/ from ./cairo_simulator/src/cairo_simulator/
 
-# from cairo_simulator.Manipulators import Manipulator
+
+
 class Simulator:
-    __instance = None
+    __instance = None    
 
     @staticmethod
     def get_instance():
@@ -34,10 +34,6 @@ class Simulator:
         self.__init_bullet()
         self.__init_vars(use_real_time)
         self.__init_ros()
-        self.__init_manipulator()
-
-    def __del__(self):
-        p.disconnect()
 
     def __del__(self):
         p.disconnect()
@@ -55,7 +51,6 @@ class Simulator:
         self.__sim_time = 0 # Used if not using real-time simulation. Increments at time_step
         self._sim_timestep = 1./240. # If not using real-time mode, amount of time to pass per step() call
         self.set_real_time(use_real_time)
-        self.__Manipulator = None
 
     def __init_bullet(self):
         # Simulation world setup
@@ -67,10 +62,6 @@ class Simulator:
     def __init_ros(self):
         rospy.Subscriber("/sim/estop_set", Empty, self.estop_set_callback)
         rospy.Subscriber("/sim/estop_release", Empty, self.estop_release_callback)
-
-    def __init_manipulator(self):
-        from cairo_simulator.Manipulators import Manipulator
-        self.__Manipulator = Manipulator
 
     def set_real_time(self, val):
         if val is False:
@@ -117,7 +108,7 @@ class Simulator:
     def process_trajectory_queues(self):
         cur_time = self.__sim_time
         for id in self._trajectory_queue.keys():
-            if self._trajectory_queue[id] is None or len(self._trajectory_queue[id][0]) is 0: continue # Nothing on queue
+            if self._trajectory_queue[id] is None: continue # Nothing on queue
 
             if self._trajectory_queue_timers[id] is not None and cur_time - self._trajectory_queue_timers[id] > self._motion_timeout:
                 # Action timed out, abort trajectory
@@ -147,7 +138,7 @@ class Simulator:
                 # Robot is at this position, get the next position and velocity targets and remove from trajectory_queue
                 self._trajectory_queue_timers[id] = cur_time
 
-                if isinstance(self._robots[id], self.__Manipulator):
+                if isinstance(self._robots[id], Manipulator):
                     self._robots[id].move_to_joint_pos_with_vel(next_pos, next_vel)
                     self._trajectory_queue[id][0] = self._trajectory_queue[id][0][1:] # Increment progress in the trajectory
                     self._trajectory_queue[id][1] = self._trajectory_queue[id][1][1:] # Increment progress in the trajectory
@@ -162,18 +153,6 @@ class Simulator:
                 rospy.logwarn("Trajectory for robot %d timed out! Aborting remainder of trajectory." % id)
                 self.clear_trajectory_queue(id)
                 continue
-
-            else:
-                next_pos = pos_vector[0]
-                next_vel = vel_vector[0]
-                self._trajectory_queue[id][0].pop(0)
-                self._trajectory_queue[id][1].pop(0)
-                print("popped")
-                if isinstance(self._robots[id], self.__Manipulator):
-                    self._robots[id].move_to_joint_pos_with_vel(next_pos, next_vel)
-                else:
-                    rospy.logerr("No mechanism for handling trajectory execution for Robot Type %s" % (str(type(self._robots[id]))))
-                    continue
 
     def add_object(self, simobj_obj):
         id = simobj_obj.get_simulator_id()
@@ -269,8 +248,6 @@ class SimObject():
 class Robot(ABC):
     '''
         Abstract Base Class for a Robot in PyBullet
-
-
         If adding a new robot, it can be helpful to check the joint info loaded from the URDF:
             import pdb
             for i in range(p.getNumJoints(self._simulator_id)):
@@ -280,7 +257,6 @@ class Robot(ABC):
     def __init__(self, robot_name, urdf_file, x, y, z, urdf_flags):   
         """
         Initialize a Robot at coordinates (x,y,z) and add it to the simulator manager
-
         Warning: Including p.URDF_USE_SELF_COLLISION is buggy right now due to URDF issues and is not recommended
         """ 
         super().__init__()
@@ -297,7 +273,6 @@ class Robot(ABC):
     def _populate_dof_indices(self, dof_name_list):
         '''
         Given a list of DoF names (e.g.: ['j0', 'j1', 'j2']) find their corresponding joint indices for use with p.getJointInfo to retrieve state.
-
         @param sim_id ID of the entity to find DoF indices for
         @param dof_name_list List of joint names in the order desired
         @returns List of indices into p.getJointInfo corresponding to the dof_names requested
